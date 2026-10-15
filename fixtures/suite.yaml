@@ -1,0 +1,49 @@
+schema_version: "1.0.0"
+cases:
+  - id: transformed_primitive
+    description: True positive with Houdini Y-up and centimeter units.
+    baseline: transformed_primitive/blender.snapshot.json
+    candidate: transformed_primitive/houdini.snapshot.json
+    config: transformed_primitive/parityforge.toml
+    expect:
+      overall: PASS
+      equality_claim: exact_match
+      labels: [exact_match]
+  - id: incorrect_transform
+    description: Same primitive with an extra 0.4 m of Houdini X translation.
+    baseline: incorrect_transform/blender.snapshot.json
+    candidate: incorrect_transform/houdini.snapshot.json
+    config: incorrect_transform/parityforge.toml
+    expect:
+      overall: FAIL
+      equality_claim: not_equal
+      metrics:
+        centroid: FAIL
+        point_count: PASS
+        surface_area: PASS
+  - id: seeded_scatter
+    description: Same count and seed, independent uniform samples.
+    baseline: seeded_scatter/blender.snapshot.json
+    candidate: seeded_scatter/houdini.snapshot.json
+    config: seeded_scatter/parityforge.toml
+    nodebridge_link: nodebridge_scatter/link.json
+    expect:
+      overall: PASS
+      equality_claim: statistical_similarity
+      labels: [equivalent_in_distribution, statistical_similarity]
+      metrics:
+        instance_count: PASS
+        vertex_position: NOT_EVALUATED
+        seed: PASS
+  - id: attribute_domain_mismatch
+    description: Same quad, mask stored on points versus faces.
+    baseline: attribute_domain_mismatch/blender.snapshot.json
+    candidate: attribute_domain_mismatch/houdini.snapshot.json
+    config: attribute_domain_mismatch/parityforge.toml
+    expect:
+      overall: FAIL
+      equality_claim: not_equal
+      metrics:
+        attribute_schema: FAIL
+        attribute_values: NOT_EVALUATED
+        point_count: PASS

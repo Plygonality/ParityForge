@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0.0",
+  "identity": {
+    "snapshot_id": "scatter-blender",
+    "scene": "ScatterScene",
+    "asset": "Scatter",
+    "source_app": "blender",
+    "source_version": "fixture",
+    "time": {
+      "frame": 1,
+      "fps": 24,
+      "seconds": 0.0
+    },
+    "seed": 42,
+    "units": {
+      "length_unit": "meter",
+      "meters_per_unit": 1.0,
+      "angle": "radian"
+    },
+    "coordinate_basis": {
+      "name": "blender",
+      "handedness": "right",
+      "up_axis": "Z",
+      "forward_axis": "-Y",
+      "matrix_to_canonical": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "parameters": {
+    "count": 5000,
+    "seed": 42,
+    "domain": "10m_square"
+  },
+  "objects": [
+    {
+      "name": "Scatter",
+      "path": "Scatter",
+      "type": "instances",
+      "transform": {
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "instances": {
+        "count": 5000,
+        "prototype": "Rock",
+        "space": "world",
+        "positions_npz": "blender_instances.npz",
+        "positions_key": "positions",
+        "correspondence": "none"
+      },
+      "attributes": []
+    }
+  ],
+  "execution": {
+    "captured_at": "2026-10-15T00:00:00Z",
+    "host_script": "scripts/capture_blender.py",
+    "command": "python tools/build_fixtures.py",
+    "producer": "parityforge.authoring",
+    "warnings": [],
+    "note": "Authored fixture expressing evaluated output. Not captured from a live DCC process. Positions come from independent uniform streams. The declared seed matches; the samples do not."
+  },
+  "hashes": {
+    "algorithm": "sha256",
+    "metadata_sha256": "b4c51c3621d1eb3b6066620f372db4affdc6b416414c8fcc11760282737ad9ac",
+    "arrays": {
+      "blender_instances.npz": "dc9c6f36daeceaec7a55c8867b10b5dcefeceebd668fea32ea1c79aadae510a7"
+    }
+  }
+}
