@@ -207,6 +207,44 @@ def points_to_canonical(
     return apply_linear(pts, basis_to_canonical)
 
 
+def shape_parameters(
+    points: Array,
+    matrix4: Array,
+    basis_to_canonical: Array,
+    meters_per_unit: float,
+) -> dict[str, float]:
+    """Local size and object scale in the canonical frame.
+
+    Extents are the axis-aligned size of local points after the declared
+    basis and unit conversion, before the object matrix. Scales are the
+    column norms of the canonical linear map. Both hosts write these names
+    so a centimeter Houdini mesh can match a meter Blender mesh.
+    """
+    pts = np.asarray(points, dtype=float)
+    if pts.size == 0:
+        extent = np.zeros(3)
+    else:
+        local = apply_linear(length_to_meters(pts, meters_per_unit), basis_to_canonical)
+        extent = local.max(axis=0) - local.min(axis=0)
+    linear, _translation = canonical_linear_and_translation(matrix4, basis_to_canonical, meters_per_unit)
+    scales = column_scales(linear)
+
+    def num(value: float) -> float:
+        rounded = round(float(value), 9)
+        if abs(rounded) < 1e-12:
+            return 0.0
+        return rounded
+
+    return {
+        "extent_x_m": num(extent[0]),
+        "extent_y_m": num(extent[1]),
+        "extent_z_m": num(extent[2]),
+        "scale_x": num(scales[0]),
+        "scale_y": num(scales[1]),
+        "scale_z": num(scales[2]),
+    }
+
+
 def column_scales(linear: Array) -> Array:
     """Per-axis scale as the column norms of a linear map."""
     return np.linalg.norm(np.asarray(linear, dtype=float), axis=0)

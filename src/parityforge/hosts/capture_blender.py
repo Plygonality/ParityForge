@@ -7,7 +7,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from parityforge.coordinates import NAMED_FORWARD, NAMED_HANDEDNESS, NAMED_TO_CANONICAL, NAMED_UP
+from parityforge.coordinates import (
+    NAMED_FORWARD,
+    NAMED_HANDEDNESS,
+    NAMED_TO_CANONICAL,
+    NAMED_UP,
+    shape_parameters,
+)
 from parityforge.errors import HostError
 from parityforge.hosts.invocation import BLENDER_CAPTURE_EXAMPLE, MIN_BLENDER, split_script_args
 from parityforge.snapshot_io import save_snapshot
@@ -36,6 +42,22 @@ def parser() -> argparse.ArgumentParser:
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     return parser().parse_args(split_script_args(argv))
+
+
+def _shape_parameters(objects: list[dict[str, Any]], meters_per_unit: float) -> dict[str, float]:
+    meshes = [obj for obj in objects if obj.get("geometry", {}).get("points")]
+    basis = NAMED_TO_CANONICAL["blender"]
+
+    def one(obj: dict[str, Any]) -> dict[str, float]:
+        return shape_parameters(obj["geometry"]["points"], obj["transform"]["matrix"], basis, meters_per_unit)
+
+    if len(meshes) == 1:
+        return one(meshes[0])
+    parameters: dict[str, float] = {}
+    for obj in meshes:
+        for key, value in one(obj).items():
+            parameters[f"{obj['name']}.{key}"] = value
+    return parameters
 
 
 def _matrix(matrix: Any) -> list[list[float]]:
@@ -79,6 +101,10 @@ def _read_attributes(mesh: Any, warnings: list[str]) -> list[dict[str, Any]]:
         except Exception as exc:
             warnings.append(f"Attribute {attr.name!r} could not be read: {exc}")
             continue
+        reason = _schema_exclusion(attr.name, domain, values)
+        if reason is not None:
+            warnings.append(reason)
+            continue
         attributes.append(
             {
                 "name": attr.name,
@@ -89,6 +115,35 @@ def _read_attributes(mesh: Any, warnings: list[str]) -> list[dict[str, Any]]:
             }
         )
     return attributes
+
+
+def _schema_exclusion(name: str, domain: str, values: Any) -> str | None:
+    """Host bookkeeping stays out of the attribute schema and stays visible."""
+    if name.startswith("."):
+        return (
+            f"Attribute {name!r} is Blender host bookkeeping and was excluded from the attribute schema. "
+            "A user attribute with this name would still be a schema failure if it were kept."
+        )
+    if name == "position" and domain == "point":
+        return (
+            "Attribute 'position' duplicates geometry.points and was excluded from the attribute schema. "
+            "Houdini capture excludes P the same way."
+        )
+    if name == "sharp_face" and domain == "face":
+        return (
+            "Attribute 'sharp_face' is Blender's builtin face-sharpness flag and was excluded from the attribute schema. "
+            f"{_value_summary(values)}. Houdini does not create this attribute on its own, so keeping it would fail every mesh."
+        )
+    return None
+
+
+def _value_summary(values: Any) -> str:
+    if not isinstance(values, list):
+        return "Values were not summarised"
+    if len(values) <= 8:
+        return f"Values {values}"
+    nonzero = sum(1 for item in values if item not in (0, 0.0))
+    return f"{len(values)} values, {nonzero} non-zero"
 
 
 def _capture_mesh(obj: Any, depsgraph: Any, warnings: list[str]) -> dict[str, Any] | None:
@@ -207,6 +262,7 @@ def capture_bpy(bpy: Any, args: argparse.Namespace) -> dict[str, Any]:
             hint="The scene needs a mesh, or pass --object Name. Camera and light objects are skipped.",
         )
     scale = float(scene.unit_settings.scale_length)
+    parameters = _shape_parameters(objects, scale)
     frame = float(scene.frame_current)
     fps = float(scene.render.fps)
     basis = NAMED_TO_CANONICAL["blender"].tolist()
@@ -229,7 +285,7 @@ def capture_bpy(bpy: Any, args: argparse.Namespace) -> dict[str, Any]:
                 "matrix_to_canonical": basis,
             },
         },
-        "parameters": {},
+        "parameters": parameters,
         "objects": objects,
         "execution": {
             "captured_at": "live",

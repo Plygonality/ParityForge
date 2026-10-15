@@ -7,7 +7,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from parityforge.coordinates import NAMED_FORWARD, NAMED_HANDEDNESS, NAMED_TO_CANONICAL, NAMED_UP
+from parityforge.coordinates import (
+    NAMED_FORWARD,
+    NAMED_HANDEDNESS,
+    NAMED_TO_CANONICAL,
+    NAMED_UP,
+    shape_parameters,
+)
 from parityforge.errors import HostError
 from parityforge.hosts.invocation import HOUDINI_CAPTURE_EXAMPLE, MIN_HOUDINI, split_script_args
 from parityforge.snapshot_io import save_snapshot
@@ -77,9 +83,19 @@ def _world_matrix(hou: Any, node: Any, warnings: list[str]) -> list[list[float]]
     return _identity()
 
 
+def _shape_parameters(points: list[list[float]], matrix: list[list[float]], meters_per_unit: float) -> dict[str, float]:
+    if not points:
+        return {}
+    return shape_parameters(points, matrix, NAMED_TO_CANONICAL["houdini"], meters_per_unit)
+
+
 def _attrib_values(hou: Any, geo: Any, attrib: Any, domain: str, warnings: list[str]) -> dict[str, Any] | None:
     name = attrib.name()
     if name == "P":
+        warnings.append(
+            "Attribute 'P' duplicates geometry points and was excluded from the attribute schema. "
+            "Blender capture excludes the point 'position' attribute the same way."
+        )
         return None
     data_type = attrib.dataType()
     size = int(attrib.size())
@@ -238,7 +254,7 @@ def capture_hou(hou: Any, args: argparse.Namespace) -> dict[str, Any]:
                 "matrix_to_canonical": basis,
             },
         },
-        "parameters": {},
+        "parameters": _shape_parameters(points, obj["transform"]["matrix"], float(args.meters_per_unit)),
         "objects": [obj],
         "execution": {
             "captured_at": "live",

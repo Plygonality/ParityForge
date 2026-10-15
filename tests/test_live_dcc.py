@@ -109,6 +109,19 @@ def test_live_blender_plane_matches_canonical_houdini(tmp_path: Path) -> None:
     # The capture declares no index correspondence, so vertex identity stays unevaluated.
     vertex = next(item for item in report["metrics"] if item["id"].endswith("vertex_position"))
     assert vertex["status"] == "NOT_EVALUATED"
+    default = compare_loaded(
+        live,
+        load_snapshot(Path("fixtures/transformed_primitive/houdini.snapshot.json")),
+        load_config(Path("fixtures/transformed_primitive/parityforge.toml")),
+    )
+    assert default["overall"] == "INCONCLUSIVE", default["summary"]
+    parameters = next(item for item in default["metrics"] if item["id"] == "parameters")
+    assert parameters["status"] == "PASS", parameters
+    schema = next(item for item in default["metrics"] if item["id"].endswith("attribute_schema"))
+    assert schema["applicable"] is False
+    warning_text = " ".join(live.model.execution.warnings)
+    assert "position" in warning_text
+    assert "sharp_face" in warning_text or "UVMap" in warning_text
 
 
 def test_live_houdini_demo(tmp_path: Path) -> None:

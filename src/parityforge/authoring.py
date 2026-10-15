@@ -12,7 +12,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .coordinates import NAMED_FORWARD, NAMED_HANDEDNESS, NAMED_TO_CANONICAL, NAMED_UP
+from .coordinates import NAMED_FORWARD, NAMED_HANDEDNESS, NAMED_TO_CANONICAL, NAMED_UP, shape_parameters
 from .snapshot_io import save_snapshot
 
 PLANE = [
@@ -131,7 +131,11 @@ def build_transformed(root: Path, *, translation_cm_x: float, case: str, snapsho
     blender_matrix = _matrix((2.0, 1.0, 1.0), (1.0, 2.0, 3.0))
     # Hand map of translation (1, 2, 3) m -> (1, 3, -2) m -> centimeters, with an optional X bias.
     houdini_matrix = _matrix((2.0, 1.0, 1.0), (translation_cm_x, 300.0, -200.0))
-    parameters = {"size_x": 2.0, "size_y": 2.0, "scale_x": 2.0}
+    houdini_points = [to_houdini_centimeters(point) for point in PLANE]
+    blender_parameters = shape_parameters(PLANE, blender_matrix, NAMED_TO_CANONICAL["blender"], 1.0)
+    houdini_parameters = shape_parameters(houdini_points, houdini_matrix, NAMED_TO_CANONICAL["houdini"], 0.01)
+    if blender_parameters != houdini_parameters:
+        raise RuntimeError(f"Plane shape parameters diverged: {blender_parameters} vs {houdini_parameters}")
     baseline = {
         "schema_version": "1.0.0",
         "identity": _identity(
@@ -144,7 +148,7 @@ def build_transformed(root: Path, *, translation_cm_x: float, case: str, snapsho
             length_unit="meter",
             angle="radian",
         ),
-        "parameters": parameters,
+        "parameters": blender_parameters,
         "objects": [
             _mesh_object(
                 name="Plane",
@@ -167,12 +171,12 @@ def build_transformed(root: Path, *, translation_cm_x: float, case: str, snapsho
             length_unit="centimeter",
             angle="degree",
         ),
-        "parameters": parameters,
+        "parameters": houdini_parameters,
         "objects": [
             _mesh_object(
                 name="Plane",
                 path="/obj/geo1/OUT",
-                points=[to_houdini_centimeters(point) for point in PLANE],
+                points=houdini_points,
                 matrix=houdini_matrix,
             )
         ],

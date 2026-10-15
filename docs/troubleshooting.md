@@ -34,6 +34,12 @@ hython scripts/capture_houdini.py --hip scene.hip --node /obj/geo1/OUT --out sna
 
 `--meters-per-unit 0.01` records centimeters. The default is 1. A wrong value shows up as a scale error in the centroid, which is what you want.
 
+## Built-in Blender attributes
+
+Capture writes a warning and leaves these out of the attribute schema: names starting with `.`, the point attribute `position` (it repeats `geometry.points`; Houdini capture does the same for `P`), and `sharp_face`. The `sharp_face` warning includes the values. `UVMap` is `FLOAT2`, which v0.1 does not score, so it is a warning rather than a passing attribute. A user attribute such as `mask` stays in the schema and fails the compare when the other snapshot does not declare it.
+
+Shape parameters are `extent_x_m`, `extent_y_m`, `extent_z_m`, `scale_x`, `scale_y`, and `scale_z` in the canonical frame. A centimeter Houdini mesh and a meter Blender mesh can share those numbers. They are measured from the evaluated points and matrix, not from the operator stack.
+
 ## Metadata hash mismatch
 
 The JSON was edited after sealing, or it was not written by ParityForge. The error prints the declared hash and the recomputed hash. Rebuild with the capture script or `python tools/build_fixtures.py`. Validation will not skip the check.

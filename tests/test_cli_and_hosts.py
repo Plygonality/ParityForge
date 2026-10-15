@@ -132,6 +132,18 @@ class _Mesh:
         ]
         self.polygons = [type("P", (), {"vertices": [0, 1, 2, 3]})()]
         self.attributes = [
+            type("A", (), {"name": "position", "domain": "POINT", "data_type": "FLOAT_VECTOR", "data": []})(),
+            type("A", (), {"name": ".select_vert", "domain": "POINT", "data_type": "BOOLEAN", "data": []})(),
+            type(
+                "A",
+                (),
+                {
+                    "name": "sharp_face",
+                    "domain": "FACE",
+                    "data_type": "BOOLEAN",
+                    "data": [type("D", (), {"value": False})()],
+                },
+            )(),
             type(
                 "A",
                 (),
@@ -146,7 +158,7 @@ class _Mesh:
                         type("D", (), {"value": 1.0})(),
                     ],
                 },
-            )()
+            )(),
         ]
 
 
@@ -203,7 +215,19 @@ def test_fake_bpy_capture_roundtrip(tmp_path: Path) -> None:
     assert loaded.model.identity.source_version == "4.5.14"
     assert loaded.model.identity.seed == 7
     assert loaded.objects[0].points.shape == (4, 3)
-    assert loaded.objects[0].attributes[0].name == "mask"
+    assert [attr.name for attr in loaded.objects[0].attributes] == ["mask"]
+    assert loaded.model.parameters == {
+        "extent_x_m": 2.0,
+        "extent_y_m": 2.0,
+        "extent_z_m": 0.0,
+        "scale_x": 1.0,
+        "scale_y": 1.0,
+        "scale_z": 1.0,
+    }
+    warning_text = " ".join(loaded.model.execution.warnings)
+    assert "position" in warning_text
+    assert ".select_vert" in warning_text
+    assert "sharp_face" in warning_text
     assert loaded.objects[0].correspondence == "none"
     old = type("Bpy", (), {"app": type("App", (), {"version": (3, 3, 0)})(), "context": context})()
     try:
@@ -349,6 +373,9 @@ def test_fake_hou_capture_reads_points_and_attributes(tmp_path: Path) -> None:
     assert document["identity"]["units"]["meters_per_unit"] == 0.01
     assert document["objects"][0]["geometry"]["point_count"] == 3
     assert document["objects"][0]["attributes"][0]["name"] == "mask"
+    assert any("Attribute 'P'" in warning for warning in document["execution"]["warnings"])
+    assert document["parameters"]["extent_x_m"] == 0.01
+    assert document["parameters"]["scale_x"] == 1.0
     path = tmp_path / "houdini.snapshot.json"
     from parityforge.snapshot_io import save_snapshot
 

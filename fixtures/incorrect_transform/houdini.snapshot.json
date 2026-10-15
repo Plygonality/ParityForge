@@ -42,9 +42,12 @@
     }
   },
   "parameters": {
-    "size_x": 2.0,
-    "size_y": 2.0,
-    "scale_x": 2.0
+    "extent_x_m": 2.0,
+    "extent_y_m": 2.0,
+    "extent_z_m": 0.0,
+    "scale_x": 2.0,
+    "scale_y": 1.0,
+    "scale_z": 1.0
   },
   "objects": [
     {
@@ -128,7 +131,7 @@
   },
   "hashes": {
     "algorithm": "sha256",
-    "metadata_sha256": "46707c61bd545dddfe2ef1706e5d2436006eb1f108a4cb8320834949636a3ae1",
+    "metadata_sha256": "9b1a6277c17ce4f920fb3581afbf43d9a8584cd3e9d05ea20884929aee962ae5",
     "arrays": {}
   }
 }

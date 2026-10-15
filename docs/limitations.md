@@ -12,7 +12,7 @@ The four demonstration cases are written by `parityforge.authoring`. Their `sour
 
 ## Host lanes
 
-* Blender capture is implemented against `bpy`'s evaluated depsgraph. v0.1 ran it in Blender 4.5.14 LTS: a factory-startup plane captured through `scripts/blender_demo.py` matched the authored Houdini centimeter fixture on point count, face count, centroid, surface area, Hausdorff distance, and bounds. Vertex identity stayed `NOT_EVALUATED`. The same pair under the default identity gates is an overall FAIL, because the live snapshot has empty `parameters` and Blender's built-in attributes (`position`, selection, `sharp_face`, corners), while the fixture declares `size_x`, `size_y`, and `scale_x` and no attributes. Centroids still differ by 0.0 m. `UVMap` (`FLOAT2`) and `.edge_verts` (`INT32_2D`) are warnings, not silent passes. That session is not a substitute for a Houdini cook of the same scene.
+* Blender capture is implemented against `bpy`'s evaluated depsgraph. v0.1 ran it in Blender 4.5.14 LTS. The factory-startup plane matched the authored Houdini centimeter fixture on point count, face count, centroid, surface area, Hausdorff distance, bounds, and canonical shape parameters (`extent_*_m`, `scale_*`). Vertex identity and topology stayed `NOT_EVALUATED` because the capture writes `correspondence = none`, so the default identity verdict is `INCONCLUSIVE`. Dot-prefixed attributes, the point `position` attribute, and builtin `sharp_face` are named in warnings and left out of the attribute schema. `sharp_face` on that plane was `[1]`. `UVMap` (`FLOAT2`) and `.edge_verts` (`INT32_2D`) are warnings, not silent passes. That session is not a substitute for a Houdini cook of the same scene.
 * Houdini capture is implemented against `hou` and is covered by a structural fake in unit tests. That fake is not a Houdini session. If `hython` cannot import `hou`, doctor reports the lane `NOT_RUN`. CI on GitHub-hosted runners asserts that absence. No Houdini license was available while building v0.1.
 * Unreal is not implemented. No Editor session was run. See [unreal_v0.2.md](unreal_v0.2.md).
 
@@ -22,6 +22,7 @@ The four demonstration cases are written by `parityforge.authoring`. Their `sour
 * Vertex identity requires `correspondence = "index"` on both sides and equal counts. Otherwise the metric is `NOT_EVALUATED`.
 * Distributional passes do not claim shared point ids. The Hausdorff distance and the 99th-percentile nearest-neighbour distance are still reported.
 * Surface area is the absolute area of a fan triangulation. Non-manifold or unfaced point clouds do not receive a passing area.
+* Blender attributes whose names start with `.`, the point attribute `position`, and builtin `sharp_face` are excluded from the attribute schema. Each exclusion is a warning, and `sharp_face` includes its values. A custom attribute that is not in that set still fails the schema when the other side lacks it. Face sharpness is therefore not a gated metric in v0.1.
 * Edge-domain attributes are listed and marked `UNSUPPORTED`. They are not dropped and they are not scored.
 * Vector attributes with `role = "unknown"` are inconclusive. Direction attributes under non-uniform scale are inconclusive, because v0.1 does not apply an inverse-transpose.
 * Image comparison is `UNSUPPORTED` even when a thumbnail path is present.
