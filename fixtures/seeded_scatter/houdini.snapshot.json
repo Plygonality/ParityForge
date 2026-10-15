@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0.0",
+  "identity": {
+    "snapshot_id": "scatter-houdini",
+    "scene": "scatter.hip",
+    "asset": "Scatter",
+    "source_app": "houdini",
+    "source_version": "fixture",
+    "time": {
+      "frame": 1,
+      "fps": 24,
+      "seconds": 0.0
+    },
+    "seed": 42,
+    "units": {
+      "length_unit": "meter",
+      "meters_per_unit": 1.0,
+      "angle": "degree"
+    },
+    "coordinate_basis": {
+      "name": "houdini",
+      "handedness": "right",
+      "up_axis": "Y",
+      "forward_axis": "+Z",
+      "matrix_to_canonical": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    }
+  },
+  "parameters": {
+    "count": 5000,
+    "seed": 42,
+    "domain": "10m_square"
+  },
+  "objects": [
+    {
+      "name": "Scatter",
+      "path": "/obj/geo1/OUT",
+      "type": "instances",
+      "transform": {
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "instances": {
+        "count": 5000,
+        "prototype": "Rock",
+        "space": "world",
+        "positions_npz": "houdini_instances.npz",
+        "positions_key": "positions",
+        "correspondence": "none"
+      },
+      "attributes": []
+    }
+  ],
+  "execution": {
+    "captured_at": "2026-10-15T00:00:00Z",
+    "host_script": "scripts/capture_houdini.py",
+    "command": "python tools/build_fixtures.py",
+    "producer": "parityforge.authoring",
+    "warnings": [],
+    "note": "Authored fixture expressing evaluated output. Not captured from a live DCC process. Positions come from independent uniform streams. The declared seed matches; the samples do not."
+  },
+  "hashes": {
+    "algorithm": "sha256",
+    "metadata_sha256": "599f3329856d9d86d37a5cdf8f09477ff0e325a8b5022e6d1c7cad7fce9c2a08",
+    "arrays": {
+      "houdini_instances.npz": "fad4ea2cf41c49aed09483f34db056589d86c9240cd691df396210449200395a"
+    }
+  }
+}

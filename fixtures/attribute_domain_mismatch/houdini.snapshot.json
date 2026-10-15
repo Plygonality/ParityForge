@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0.0",
+  "identity": {
+    "snapshot_id": "mask-houdini",
+    "scene": "mask.hip",
+    "asset": "/obj/geo1/OUT",
+    "source_app": "houdini",
+    "source_version": "fixture",
+    "time": {
+      "frame": 1,
+      "fps": 24,
+      "seconds": 0.0
+    },
+    "seed": null,
+    "units": {
+      "length_unit": "meter",
+      "meters_per_unit": 1.0,
+      "angle": "degree"
+    },
+    "coordinate_basis": {
+      "name": "houdini",
+      "handedness": "right",
+      "up_axis": "Y",
+      "forward_axis": "+Z",
+      "matrix_to_canonical": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    }
+  },
+  "parameters": {
+    "attribute": "mask"
+  },
+  "objects": [
+    {
+      "name": "Plate",
+      "path": "/obj/geo1/OUT",
+      "type": "mesh",
+      "transform": {
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "geometry": {
+        "space": "local",
+        "point_count": 4,
+        "points": [
+          [
+            -1.0,
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0,
+            -1.0
+          ],
+          [
+            -1.0,
+            0.0,
+            -1.0
+          ]
+        ],
+        "correspondence": "index",
+        "face_counts": [
+          4
+        ],
+        "face_indices": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "attributes": [
+        {
+          "name": "mask",
+          "domain": "face",
+          "type": "float",
+          "role": "scalar",
+          "inline": [
+            0.5
+          ]
+        }
+      ]
+    }
+  ],
+  "execution": {
+    "captured_at": "2026-10-15T00:00:00Z",
+    "host_script": "scripts/capture_houdini.py",
+    "command": "python tools/build_fixtures.py",
+    "producer": "parityforge.authoring",
+    "warnings": [],
+    "note": "Authored fixture expressing evaluated output. Not captured from a live DCC process. mask is a primitive attribute."
+  },
+  "hashes": {
+    "algorithm": "sha256",
+    "metadata_sha256": "46080e2cae1dbe6c3be1876defbdb008d2d6d13527b961183f62e26d95364093",
+    "arrays": {}
+  }
+}

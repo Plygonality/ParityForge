@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0.0",
+  "identity": {
+    "snapshot_id": "plane-blender-bias",
+    "scene": "PlaneScene",
+    "asset": "Plane",
+    "source_app": "blender",
+    "source_version": "fixture",
+    "time": {
+      "frame": 1,
+      "fps": 24,
+      "seconds": 0.0
+    },
+    "seed": null,
+    "units": {
+      "length_unit": "meter",
+      "meters_per_unit": 1.0,
+      "angle": "radian"
+    },
+    "coordinate_basis": {
+      "name": "blender",
+      "handedness": "right",
+      "up_axis": "Z",
+      "forward_axis": "-Y",
+      "matrix_to_canonical": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "parameters": {
+    "extent_x_m": 2.0,
+    "extent_y_m": 2.0,
+    "extent_z_m": 0.0,
+    "scale_x": 2.0,
+    "scale_y": 1.0,
+    "scale_z": 1.0
+  },
+  "objects": [
+    {
+      "name": "Plane",
+      "path": "Plane",
+      "type": "mesh",
+      "transform": {
+        "matrix": [
+          [
+            2.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            2.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            3.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "geometry": {
+        "space": "local",
+        "point_count": 4,
+        "points": [
+          [
+            -1.0,
+            -1.0,
+            0.0
+          ],
+          [
+            1.0,
+            -1.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            -1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "correspondence": "index",
+        "face_counts": [
+          4
+        ],
+        "face_indices": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "attributes": []
+    }
+  ],
+  "execution": {
+    "captured_at": "2026-10-15T00:00:00Z",
+    "host_script": "scripts/capture_blender.py",
+    "command": "python tools/build_fixtures.py",
+    "producer": "parityforge.authoring",
+    "warnings": [],
+    "note": "Authored fixture expressing evaluated output. Not captured from a live DCC process."
+  },
+  "hashes": {
+    "algorithm": "sha256",
+    "metadata_sha256": "bb95054cc1b6f1c9b0d963cc6a3a5edaf879f5ce790716f85bb8623527a623c1",
+    "arrays": {}
+  }
+}

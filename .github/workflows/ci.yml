@@ -1,0 +1,64 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: offline ${{ matrix.os }} / py${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check src tests tools scripts
+      - name: Test
+        run: python -m pytest
+
+  blender:
+    name: blender capture
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Blender 4.5.14
+        run: |
+          curl -fsSL -o blender.tar.xz https://ftp.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz
+          echo "9ba871ff2ecd36526b77432745980b7e6664ecd0c7ca11c48849073dcfe06da3  blender.tar.xz" | sha256sum -c -
+          tar -xf blender.tar.xz
+          echo "PARITYFORGE_BLENDER=$PWD/blender-4.5.14-linux-x64/blender" >> "$GITHUB_ENV"
+          echo "PARITYFORGE_REQUIRE_BLENDER=1" >> "$GITHUB_ENV"
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Install pydantic into Blender Python
+        run: python tools/install_blender_host_deps.py --blender "$PARITYFORGE_BLENDER"
+      - name: Live capture
+        run: python -m pytest tests/test_live_dcc.py -q -rs
+
+  houdini:
+    name: houdini lane
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Declare the lane
+        run: |
+          python tools/host_lane_status.py | tee host-lanes.json
+          python -c "import json; data=json.load(open('host-lanes.json')); assert data['houdini']=='NOT_RUN', data; assert data['unreal']=='NOT_RUN'"
+          python -m pytest tests/test_live_dcc.py::test_live_houdini_demo -q -rs

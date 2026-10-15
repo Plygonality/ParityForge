@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/Plygonality/NodeBridge",
+  "audited_commit": "21d5ca9cc43f09ac173a5e487003f6bc13ac33bf",
+  "source_graph": "examples/scatter/scatter.graph.json",
+  "translation_report": "expected_report_houdini.txt",
+  "operation_kind": "SCATTER",
+  "note": "The report text is the NodeBridge scatter Houdini report at the audited commit. The evaluated snapshots are authored ParityForge fixtures for an EQUIVALENT scatter, not a live cook of generated_houdini.py."
+}
